@@ -4,7 +4,7 @@ import settings
 
 if __name__ == '__main__':
 
-    jobs = query_jobs(settings.url)
+    jobs = query_jobs(settings.URL)
     save_jobs(jobs)
     print('job data save completed')
                
