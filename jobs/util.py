@@ -1,6 +1,4 @@
 import os
-from functools import reduce
-import tweepy
 import json
 import sqlite3
 import settings
@@ -28,19 +26,18 @@ def initDB():
 
 
 # Class for defining a Tweet
-def save_jobs(tweet, query=None):
+def save_jobs(jobs, query=None):
     connect = initDB()
     query = query or "INSERT INTO jobs (status text, date text) VALUES (?, ?)"
 
    
-    if len(tweet) > 1:       
+    if len(jobs) > 1:       
         connect.cursor().executemany(query, jobs)
     else:
-        connect.cursor().execute(query, tweet)
+        connect.cursor().execute(query, jobs)
     connect.commit()
        
 def query_jenkin(url):
-    auth = tweepy.OAuthHandler(settings.CONSUMER_KEY, settings.CONSUMER_SECRET)
     jenkins_server = jenkins_connection(
         url,
         settings.USERNAME,
@@ -48,14 +45,8 @@ def query_jenkin(url):
     )
         
     jobs = [jenkins_server.get_job_info(job.name) for job in jenkins_server.get_jobs()]
-    
-    
-    def reducer(accumulator, currentvalue):
-        accumulator = accumulator if accumulator else []
-        accumulator.append((currentvalue.result, currentvalue.timestamp))
-        return accumulator
         
-    return reduce(reducer, jobs, [])
+    return [(job.result, job.timestamp) for job in jobs]
    
    
       
